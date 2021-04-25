@@ -4,8 +4,6 @@ from flask import Flask, request
 from hashlib import md5, sha256
 import hmac, base64, time, os
 
-app = Flask(__name__)
-
 if 'MODE_ACCESS_KEY' in os.environ and 'MODE_ACCESS_SECRET' in os.environ and 'MODE_TEAM' in os.environ:
     mode_access_key = os.getenv('MODE_ACCESS_KEY')
     mode_access_secret = os.getenv('MODE_ACCESS_SECRET')
@@ -13,6 +11,8 @@ if 'MODE_ACCESS_KEY' in os.environ and 'MODE_ACCESS_SECRET' in os.environ and 'M
 else:
     print("The following environment variables must be present: MODE_ACCESS_KEY, MODE_ACCESS_SECRET and MODE_TEAM")
     exit(1)
+
+app = Flask(__name__)
 
 @app.route('/account_report')
 def sign_account_report_url():
@@ -37,3 +37,9 @@ def sign_account_report_url():
     # return the signed URL as an iframe
     signed_url = '%s&signature=%s' % (url, signature)
     return f"<iframe src='{signed_url}' width='100%' height='100%' frameborder='0' </iframe>"
+
+if __name__ == "__main__":
+    listen_port = 8080
+    if 'PORT' in os.environ:
+        listen_port = int(os.getenv('PORT'))
+    app.run(host='0.0.0.0', port=listen_port)

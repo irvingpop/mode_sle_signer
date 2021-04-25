@@ -34,4 +34,4 @@ COPY . /app
 WORKDIR /app
 
 EXPOSE 5000
-CMD /usr/local/bin/flask run
+CMD /usr/local/bin/python3 app.py
