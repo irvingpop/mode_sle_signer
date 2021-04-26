@@ -36,7 +36,16 @@ def sign_account_report_url():
 
     # return the signed URL as an iframe
     signed_url = '%s&signature=%s' % (url, signature)
-    return f"<iframe src='{signed_url}' width='100%' height='100%' frameborder='0' </iframe>"
+    return f"""
+    <iframe src='{signed_url}' width='100%' height='100%' frameborder='0' </iframe>
+    <script src='/static/poll.js'></script>
+    """
+
+
+@app.route('/status')
+def status():
+    return 'Success'
+
 
 if __name__ == "__main__":
     listen_port = 8080
