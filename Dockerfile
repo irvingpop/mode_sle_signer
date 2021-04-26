@@ -1,4 +1,4 @@
-FROM python:3.9-slim AS base
+FROM python:3.9-alpine AS base
 
 FROM base AS builder
 
@@ -11,13 +11,11 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   PATH="$PATH:/runtime/bin" \
-  PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.9/site-packages" \
-  # Versions:
-  POETRY_VERSION=1.1.5
+  PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.9/site-packages"
 
 # System deps:
-RUN apt-get update && apt-get install -y build-essential unzip wget
-RUN pip install "poetry==$POETRY_VERSION"
+RUN apk update && apk add --no-cache libffi-dev openssl-dev gcc rust cargo
+RUN pip install poetry
 
 WORKDIR /src
 
