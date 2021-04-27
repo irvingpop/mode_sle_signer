@@ -1,7 +1,7 @@
 #!env python3
 
 from flask import Flask, request, redirect
-from hashlib import md5, sha256
+from hashlib import sha256
 import hmac
 import base64
 import time
@@ -26,14 +26,12 @@ def sign_account_report_url():
     param1_value = request.args.get('account_id') or '0011N00001g3ns7QAA'
     do_iframe = request.args.get('iframe') or False
     timestamp = str(int(time.time()))  # current time in unix time
-    url = f"https://app.mode.com/{mode_team}/reports/{mode_report_id}/embed?access_key={mode_access_key}&{param1_name}={param1_value}&run=now&timestamp={timestamp}"
+    url = f"https://app.mode.com/{mode_team}/reports/{mode_report_id}/embed?access_key={mode_access_key}&max_age=3600&{param1_name}={param1_value}&run=now&timestamp={timestamp}"
 
-    # Generate the digest of an empty content body, cause who knows :shrug:
     request_type = 'GET'
     content_type = ''
-    content_body = str('').encode('utf-8')
-    content_hash = md5(content_body).digest()
-    content_digest = base64.encodebytes(content_hash).strip()
+    # the MD5 digest of an empty content body, always the same, :shrug:
+    content_digest = '1B2M2Y8AsgTpgAmY7PhCfg=='
 
     # signature fodder
     request_string = ','.join(
