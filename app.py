@@ -7,12 +7,13 @@ import base64
 import time
 import os
 
-if 'MODE_ACCESS_KEY' in os.environ and 'MODE_ACCESS_SECRET' in os.environ and 'MODE_TEAM' in os.environ:
+if 'MODE_ACCESS_KEY' in os.environ and 'MODE_ACCESS_SECRET' in os.environ and 'MODE_TEAM' in os.environ and 'TOKEN' in os.environ:
     mode_access_key = os.getenv('MODE_ACCESS_KEY')
     mode_access_secret = os.getenv('MODE_ACCESS_SECRET')
     mode_team = os.getenv('MODE_TEAM')
+    access_token = os.getenv('TOKEN')
 else:
-    print("The following environment variables must be present: MODE_ACCESS_KEY, MODE_ACCESS_SECRET and MODE_TEAM")
+    print("The following environment variables must be present: MODE_ACCESS_KEY, MODE_ACCESS_SECRET, MODE_TEAM and TOKEN")
     exit(1)
 
 app = Flask(__name__)
@@ -20,6 +21,10 @@ app = Flask(__name__)
 
 @app.route('/account_report')
 def sign_account_report_url():
+    provided_token = request.args.get('token') or 'missing'
+    if provided_token != access_token:
+        return "Missing or incorrect token provided"
+
     # Generating the embed URL
     mode_report_id = '3a56c4ec192c'
     param1_name = 'param_account_id'

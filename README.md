@@ -11,6 +11,7 @@ This app can be run from your machine in a dev mode, or deployed as a container.
 1. `MODE_ACCESS_KEY` (get this from Mode settings -> Sharing & Embedding -> Embedding)
 2. `MODE_ACCESS_SECRET` (same)
 3. `MODE_TEAM` (this is your URL slug in Mode, like `https://app.mode.com/organizations/<myteam>/` )
+4. `TOKEN` (a cheap security measure in case you can't use something sophisticated like Google IAP)
 
 ## Building the container
 
@@ -20,7 +21,7 @@ docker build -t mode-wle-signer .
 
 ## Running the container
 
-docker run -e MODE_TEAM=honeycombio -e MODE_ACCESS_KEY=mykey -e MODE_ACCESS_SECRET=mysecret mode-wle-signer
+docker run -e MODE_TEAM=honeycombio -e MODE_ACCESS_KEY=mykey -e MODE_ACCESS_SECRET=mysecret -e TOKEN=foo mode-wle-signer
 
 
 # Developing
@@ -34,7 +35,7 @@ poetry install
 
 Run the dev server
 ```
-FLASK_ENV=development MODE_TEAM=honeycombio MODE_ACCESS_KEY=mykey MODE_ACCESS_SECRET=mysecret poetry run flask run
+FLASK_ENV=development MODE_TEAM=honeycombio MODE_ACCESS_KEY=mykey MODE_ACCESS_SECRET=mysecret TOKEN=foo poetry run flask run
 ```
 
 Update dependencies
