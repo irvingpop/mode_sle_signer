@@ -24,7 +24,8 @@ def sign_account_report_url():
     mode_report_id = '3a56c4ec192c'
     param1_name = 'param_account_id'
     param1_value = request.args.get('account_id') or '0011N00001g3ns7QAA'
-    timestamp = str(int(time.time()))
+    do_iframe = request.args.get('iframe') or False
+    timestamp = str(int(time.time()))  # current time in unix time
     url = f"https://app.mode.com/{mode_team}/reports/{mode_report_id}/embed?access_key={mode_access_key}&{param1_name}={param1_value}&run=now&timestamp={timestamp}"
 
     # Generate the digest of an empty content body, cause who knows :shrug:
@@ -41,13 +42,15 @@ def sign_account_report_url():
                          bytes(request_string, 'utf-8'), digestmod=sha256).hexdigest()
 
     signed_url = '%s&signature=%s' % (url, signature)
-    # # return the signed URL as an iframe
-    # return f"""
-    # <iframe src='{signed_url}' width='100%' height='100%' frameborder='0' </iframe>
-    # """
 
-    # return the signed URL as a redirect
-    return redirect(signed_url, code=302)
+    if do_iframe is not False:
+        # return the signed URL as an iframe
+        return f"""
+        <iframe src='{signed_url}' width='100%' height='100%' frameborder='0' </iframe>
+        """
+    else:
+        # return the signed URL as a redirect
+        return redirect(signed_url, code=302)
 
 
 @app.route('/status')
