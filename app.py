@@ -1,8 +1,11 @@
 #!env python3
 
-from flask import Flask, request
+from flask import Flask, request, redirect
 from hashlib import md5, sha256
-import hmac, base64, time, os
+import hmac
+import base64
+import time
+import os
 
 if 'MODE_ACCESS_KEY' in os.environ and 'MODE_ACCESS_SECRET' in os.environ and 'MODE_TEAM' in os.environ:
     mode_access_key = os.getenv('MODE_ACCESS_KEY')
@@ -13,6 +16,7 @@ else:
     exit(1)
 
 app = Flask(__name__)
+
 
 @app.route('/account_report')
 def sign_account_report_url():
@@ -31,15 +35,19 @@ def sign_account_report_url():
     content_digest = base64.encodebytes(content_hash).strip()
 
     # signature fodder
-    request_string = ','.join([request_type, content_type, str(content_digest), url, timestamp])
-    signature = hmac.new(bytes(mode_access_secret, 'utf-8'), bytes(request_string, 'utf-8'), digestmod=sha256).hexdigest()
+    request_string = ','.join(
+        [request_type, content_type, str(content_digest), url, timestamp])
+    signature = hmac.new(bytes(mode_access_secret, 'utf-8'),
+                         bytes(request_string, 'utf-8'), digestmod=sha256).hexdigest()
 
-    # return the signed URL as an iframe
     signed_url = '%s&signature=%s' % (url, signature)
-    return f"""
-    <iframe src='{signed_url}' width='100%' height='100%' frameborder='0' </iframe>
-    <script src='/static/poll.js'></script>
-    """
+    # # return the signed URL as an iframe
+    # return f"""
+    # <iframe src='{signed_url}' width='100%' height='100%' frameborder='0' </iframe>
+    # """
+
+    # return the signed URL as a redirect
+    return redirect(signed_url, code=302)
 
 
 @app.route('/status')
