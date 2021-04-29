@@ -5,33 +5,40 @@ from hashlib import sha256
 import hmac
 import base64
 import time
-import os
-
-if 'MODE_ACCESS_KEY' in os.environ and 'MODE_ACCESS_SECRET' in os.environ and 'MODE_TEAM' in os.environ and 'TOKEN' in os.environ:
-    mode_access_key = os.getenv('MODE_ACCESS_KEY')
-    mode_access_secret = os.getenv('MODE_ACCESS_SECRET')
-    mode_team = os.getenv('MODE_TEAM')
-    access_token = os.getenv('TOKEN')
+import urllib
+# allow for relative importing if run directly
+if __name__ == "__main__":
+    from config import secrets, reports, listen_port
 else:
-    print("The following environment variables must be present: MODE_ACCESS_KEY, MODE_ACCESS_SECRET, MODE_TEAM and TOKEN")
-    exit(1)
+    from .config import secrets, reports, listen_port
 
 app = Flask(__name__)
 
 
-@app.route('/account_report')
-def sign_account_report_url():
+@app.route('/report/<report>')
+def sign_report_url(report):
+    # check for a valid token
     provided_token = request.args.get('token') or 'missing'
-    if provided_token != access_token:
+    if provided_token != secrets.get('access_token'):
         return "Missing or incorrect token provided"
 
-    # Generating the embed URL
-    mode_report_id = '3a56c4ec192c'
-    param1_name = 'param_account_id'
-    param1_value = request.args.get('account_id') or '0011N00001g3ns7QAA'
-    do_iframe = request.args.get('iframe') or False
-    timestamp = str(int(time.time()))  # current time in unix time
-    url = f"https://app.mode.com/{mode_team}/reports/{mode_report_id}/embed?access_key={mode_access_key}&max_age=3600&{param1_name}={param1_value}&run=now&timestamp={timestamp}"
+    # lookup report and generate URL from values
+    if report in reports:
+        this_report = reports.get(report)
+
+        # Generating the embed URL
+        mode_report_id = this_report.get('mode_report')
+        param_name = this_report.get('param_name')
+        param_value = request.args.get(
+            'account_id') or this_report.get('param_default_value')
+        do_iframe = request.args.get('iframe') or False
+        timestamp = str(int(time.time()))  # current time in unix time
+
+        url = make_url('https://app.mode.com/', secrets.get('mode_team'), 'reports',
+                       mode_report_id, 'embed', access_key=secrets.get('mode_access_key'),
+                       max_age=3600, **{param_name: param_value}, run='now', timestamp=timestamp)
+    else:
+        return f"Missing report {report}"
 
     request_type = 'GET'
     content_type = ''
@@ -41,7 +48,7 @@ def sign_account_report_url():
     # signature fodder
     request_string = ','.join(
         [request_type, content_type, str(content_digest), url, timestamp])
-    signature = hmac.new(bytes(mode_access_secret, 'utf-8'),
+    signature = hmac.new(bytes(secrets.get('mode_access_secret'), 'utf-8'),
                          bytes(request_string, 'utf-8'), digestmod=sha256).hexdigest()
 
     signed_url = '%s&signature=%s' % (url, signature)
@@ -56,13 +63,18 @@ def sign_account_report_url():
         return redirect(signed_url, code=302)
 
 
+def make_url(base_url, *res, **params):
+    url = base_url
+    for r in res:
+        url = '{}/{}'.format(url, r)
+    if params:
+        url = '{}?{}'.format(url, urllib.parse.urlencode(params))
+    return url
+
+
 @app.route('/status')
 def status():
     return 'Success'
 
-
 if __name__ == "__main__":
-    listen_port = 8080
-    if 'PORT' in os.environ:
-        listen_port = int(os.getenv('PORT'))
     app.run(host='0.0.0.0', port=listen_port)
