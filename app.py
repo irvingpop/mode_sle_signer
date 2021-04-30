@@ -34,7 +34,7 @@ def sign_report_url(report):
         do_iframe = request.args.get('iframe') or False
         timestamp = str(int(time.time()))  # current time in unix time
 
-        url = make_url('https://app.mode.com/', secrets.get('mode_team'), 'reports',
+        url = make_url('https://app.mode.com', secrets.get('mode_team'), 'reports',
                        mode_report_id, 'embed', access_key=secrets.get('mode_access_key'),
                        max_age=3600, **{param_name: param_value}, run='now', timestamp=timestamp)
     else:
