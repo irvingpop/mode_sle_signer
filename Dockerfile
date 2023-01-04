@@ -1,4 +1,4 @@
-FROM python:3.9-alpine AS base
+FROM python:3.11-alpine AS base
 
 FROM base AS builder
 
@@ -11,7 +11,7 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   PATH="$PATH:/runtime/bin" \
-  PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.9/site-packages"
+  PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.11/site-packages"
 
 # System deps:
 RUN apk update && apk add --no-cache libffi-dev openssl-dev gcc rust cargo

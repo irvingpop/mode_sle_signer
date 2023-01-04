@@ -13,9 +13,9 @@ else:
 
 reports = {
     'account': {
-        'mode_report': '82dcaf2f5dea',
+        'mode_report': 'abcd23c3ed97',
         'param_name': 'param_account_id',
-        'param_default_value': '0011N00001g3ns7QAA',
+        'param_default_value': '0011N00001FnLPoQAN',
     },
     'opportunity': {
         'mode_report': '2cfd0c546cec',
