@@ -7,13 +7,8 @@ license = "Apache 2.0"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-Flask = "^1.1.2"
-opentelemetry-api = "^1.7.1"
-opentelemetry-sdk = "^1.7.1"
-opentelemetry-exporter-gcp-trace = "^1.0.0"
-opentelemetry-instrumentation-flask = "^0.26b1"
-markupsafe = "2.0.1"
 python-dotenv = "^0.21.0"
+flask = "^2.3.2"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.6.0"

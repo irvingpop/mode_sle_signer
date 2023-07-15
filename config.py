@@ -13,7 +13,7 @@ else:
 
 reports = {
     'account': {
-        'mode_report': 'abcd23c3ed97',
+        'mode_report': 'b52a8d09ff0e',
         'param_name': 'param_account_id',
         'param_default_value': '0011N00001FnLPoQAN',
     },

@@ -20,13 +20,13 @@ docker build -t mode-wle-signer .
 ```
 
 ## Running the container
-
+```
 docker run -e MODE_TEAM=honeycombio -e MODE_ACCESS_KEY=mykey -e MODE_ACCESS_SECRET=mysecret -e TOKEN=foo mode-wle-signer
-
+```
 
 # Developing
 
-Make sure you have Python 3.9 and Poetry installed
+Make sure you have Python 3.11 and Poetry installed
 
 Install dependencies:
 ```
@@ -35,7 +35,11 @@ poetry install
 
 Run the dev server
 ```
-FLASK_ENV=development MODE_TEAM=honeycombio MODE_ACCESS_KEY=mykey MODE_ACCESS_SECRET=mysecret TOKEN=foo poetry run flask run
+MODE_TEAM=honeycombio \
+  MODE_ACCESS_KEY=mykey \
+  MODE_ACCESS_SECRET=mysecret \
+  TOKEN=foo \
+  poetry run flask run --debug
 ```
 
 Update dependencies
@@ -43,9 +47,14 @@ Update dependencies
 poetry update
 ```
 
+Local testing:
+```
+# try this in your browser
+http://127.0.0.1:5000/report/account?iframe=true&token=foo&account_id=abc123
+```
+
 # TODO
 
-* there's a hard-coded report ID in there. Make a configurable list of report IDs and params.
 * This isn't a smart thing to run open to everyone, you probably want this behind an authenticating proxy like Google IAP
 * Document how to run this in Google Cloud Run or equivalent
 * Linting and testing, some kind of CI
