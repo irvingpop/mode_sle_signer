@@ -13,6 +13,7 @@ honeycomb-opentelemetry = "^0.2.1b0"
 opentelemetry-instrumentation-flask = "0.38b0"
 opentelemetry-instrumentation-urllib = "0.38b0"
 opentelemetry-instrumentation-wsgi = "0.38b0"
+opentelemetry-api = "1.17.0"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.6.0"
