@@ -21,10 +21,18 @@ docker build -t mode-wle-signer .
 
 ## Running the container
 ```
-docker run -e MODE_TEAM=honeycombio -e MODE_ACCESS_KEY=mykey -e MODE_ACCESS_SECRET=mysecret -e TOKEN=foo mode-wle-signer
+docker run -it \
+  -e MODE_TEAM=honeycombio \
+  -e MODE_ACCESS_KEY=modekey \
+  -e MODE_ACCESS_SECRET=modesecret \
+  -e TOKEN=foo \
+  -e OTEL_SERVICE_NAME=mode_wle_signer \
+  -e HONEYCOMB_API_KEY=honeykey \
+  -p 8080:8080 \
+  mode-wle-signer
 ```
 
-# Developing
+# Local Development mode
 
 Make sure you have Python 3.11 and Poetry installed
 
@@ -33,24 +41,34 @@ Install dependencies:
 poetry install
 ```
 
-Run the dev server
+Write out a .flaskenv file for local development
 ```
-MODE_TEAM=honeycombio \
-  MODE_ACCESS_KEY=mykey \
-  MODE_ACCESS_SECRET=mysecret \
-  TOKEN=foo \
-  poetry run flask run --debug
+cat > .flaskenv << EOF
+MODE_TEAM=honeycombio
+MODE_ACCESS_KEY=mykey
+MODE_ACCESS_SECRET=mysecret
+TOKEN=foo
 ```
 
-Update dependencies
+Run the dev server with OTel enabled
 ```
-poetry update
+OTEL_SERVICE_NAME=mode_wle_signer \
+  HONEYCOMB_API_KEY=myhoneycombkey \
+  HONEYCOMB_ENABLE_LOCAL_VISUALIZATIONS=true \
+  DEBUG=true  \
+  poetry run opentelemetry-instrument flask run --debug
 ```
 
 Local testing:
 ```
 # try this in your browser
 http://127.0.0.1:5000/report/account?iframe=true&token=foo&account_id=abc123
+```
+
+
+Update dependencies
+```
+poetry update
 ```
 
 # TODO

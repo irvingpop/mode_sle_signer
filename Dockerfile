@@ -1,4 +1,4 @@
-FROM python:3.11-alpine AS base
+FROM python:3.11-slim-bookworm AS base
 
 FROM base AS builder
 
@@ -14,7 +14,7 @@ ENV PYTHONFAULTHANDLER=1 \
   PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.11/site-packages"
 
 # System deps:
-RUN apk update && apk add --no-cache libffi-dev openssl-dev gcc rust cargo
+# RUN apk update && apk add --no-cache libffi-dev openssl-dev build-base linux-headers rust cargo
 RUN pip install poetry
 
 WORKDIR /src
@@ -24,12 +24,10 @@ COPY pyproject.toml poetry.lock /src/
 RUN poetry export --dev --without-hashes --no-interaction --no-ansi -f requirements.txt -o requirements.txt
 RUN pip install --prefix=/runtime --force-reinstall -r requirements.txt
 
-COPY . /src
-
 FROM base AS runtime
 COPY --from=builder /runtime /usr/local
-COPY . /app
+COPY *.py /app/
 WORKDIR /app
 
-EXPOSE 5000
-CMD /usr/local/bin/python3 app.py
+EXPOSE 8080
+CMD /usr/local/bin/opentelemetry-instrument python3 app.py
