@@ -1,0 +1,17 @@
+services:
+  mode_wle_signer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mode_wle_signer:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT
+      - OTEL_EXPORTER_OTLP_HEADERS
+      - OTEL_SERVICE_NAME=mode_wle_signer
+      - MODE_TEAM=honeycombio
+      - MODE_ACCESS_KEY=ff23591faa1ac8ff6b9eaaf0
+      - MODE_ACCESS_SECRET=99515b660062c8558eed2bb4
+      - TOKEN=tuvVgkCPuftAKSE0pbr7vzXF
+      - DEBUG=true
