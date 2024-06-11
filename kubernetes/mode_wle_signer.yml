@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mode-wle-signer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mode-wle-signer
+  template:
+    metadata:
+      labels:
+        app: mode-wle-signer
+    spec:
+      containers:
+        - name: mode-wle-signer
+          # image: ghcr.io/irvingpop/mode_wle_signer:sha256-aa0faca7289a6e134a48632668f43e5a4e024f2c43c3bd0ba7c5b5c96349a46e.sig
+          image: ghcr.io/irvingpop/mode_wle_signer:main
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: 200Mi
+              cpu: 100m
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: mode_wle_signer
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "https://api.honeycomb.io:443"
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: mode-wle-signer-secrets
+                  key: otlp-headers
+            - name: MODE_TEAM
+              valueFrom:
+                secretKeyRef:
+                  name: mode-wle-signer-secrets
+                  key: mode-team
+            - name: MODE_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mode-wle-signer-secrets
+                  key: mode-access-key
+            - name: MODE_ACCESS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: mode-wle-signer-secrets
+                  key: mode-access-secret
+            - name: TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mode-wle-signer-secrets
+                  key: token
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mode-wle-signer-service
+spec:
+  selector:
+    app: mode-wle-signer
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mode-wle-signer-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/backend-protocol-version: HTTP1
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:939023695662:certificate/89701f3e-76c5-47ad-b94c-0f46198b54c7
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "10"
+    alb.ingress.kubernetes.io/healthcheck-path: /status
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "3"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    external-dns.alpha.kubernetes.io/hostname: modesigner.customersuccess.hny.wtf
+spec:
+  ingressClassName: alb
+  rules:
+    - host: modesigner.customersuccess.hny.wtf
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mode-wle-signer-service
+                port:
+                  number: 8080
